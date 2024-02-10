@@ -5,6 +5,8 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [taskInput, setTaskInput] = useState('');
   const [priority, setPriority] = useState('low');
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editInput, setEditInput] = useState('');
 
   const handleChange = (e) => {
     setTaskInput(e.target.value);
@@ -39,6 +41,24 @@ function App() {
     );
   };
 
+  const handleEditInputChange = (e) => {
+    setEditInput(e.target.value);
+  };
+
+  const startEditingTask = (id, text) => {
+    setEditingTaskId(id);
+    setEditInput(text);
+  };
+
+  const finishEditingTask = (id) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, text: editInput } : task
+      )
+    );
+    setEditingTaskId(null);
+  };
+
   return (
     <div className="App">
       <h1>Todo List</h1>
@@ -70,7 +90,20 @@ function App() {
                   : 'green',
             }}
           >
-            {task.text} - Priority: {task.priority} - Status: {task.completed ? 'Completed' : 'Not Completed'}
+            {editingTaskId === task.id ? (
+              <input
+                type="text"
+                value={editInput}
+                onChange={handleEditInputChange}
+                onBlur={() => finishEditingTask(task.id)}
+                autoFocus
+              />
+            ) : (
+              <span onClick={() => startEditingTask(task.id, task.text)}>
+                {task.text}
+              </span>
+            )}
+            {" - "}Status: {task.completed ? 'Completed' : 'Not Completed'}
             <button onClick={() => toggleTaskCompletion(task.id)}>
               {task.completed ? 'Undo' : 'Complete'}
             </button>
