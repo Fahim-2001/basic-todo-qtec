@@ -10,7 +10,7 @@ function App() {
   const [priority, setPriority] = useState('low');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editInput, setEditInput] = useState('');
-  const [filterPriority, setFilterPriority] = useState('low');
+  const [filterPriority, setFilterPriority] = useState('all');
 
   const handleChange = (e) => {
     setTaskInput(e.target.value);
@@ -71,7 +71,12 @@ function App() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
+  const totalTasks = tasks.length;
+
+  const completedTasks = tasks.filter(task => task.completed).length;
+
   const filteredTasks = tasks.filter(task => filterPriority === 'all' || task.priority === filterPriority);
+
   return (
     <div className="App">
       <h1>Todo List</h1>
@@ -91,12 +96,16 @@ function App() {
       </div>
       <div>
         <label htmlFor="filterPriority">Filter by Priority:</label>
-        <select id="filterPriority" value={filterPriority}  onChange={handleFilterPriorityChange}>
+        <select id="filterPriority" value={filterPriority} onChange={handleFilterPriorityChange}>
           <option value="all">All</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
+      </div>
+      <div>
+        <p>Total Tasks: {totalTasks}</p>
+        <p>Completed Tasks: {completedTasks}</p>
       </div>
       <ul>
         {filteredTasks.map((task) => (
