@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(() => {
+    const storedTasks = localStorage.getItem('tasks');
+    return storedTasks ? JSON.parse(storedTasks) : [];
+  });
   const [taskInput, setTaskInput] = useState('');
   const [priority, setPriority] = useState('low');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editInput, setEditInput] = useState('');
+  const [filterPriority, setFilterPriority] = useState('low');
 
   const handleChange = (e) => {
     setTaskInput(e.target.value);
@@ -14,6 +18,10 @@ function App() {
 
   const handlePriorityChange = (e) => {
     setPriority(e.target.value);
+  };
+
+  const handleFilterPriorityChange = (e) => {
+    setFilterPriority(e.target.value);
   };
 
   const addTask = () => {
@@ -59,6 +67,11 @@ function App() {
     setEditingTaskId(null);
   };
 
+  useEffect(() => {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
+
+  const filteredTasks = tasks.filter(task => filterPriority === 'all' || task.priority === filterPriority);
   return (
     <div className="App">
       <h1>Todo List</h1>
@@ -76,8 +89,17 @@ function App() {
         </select>
         <button onClick={addTask}>Add Task</button>
       </div>
+      <div>
+        <label htmlFor="filterPriority">Filter by Priority:</label>
+        <select id="filterPriority" value={filterPriority}  onChange={handleFilterPriorityChange}>
+          <option value="all">All</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
       <ul>
-        {tasks.map((task) => (
+        {filteredTasks.map((task) => (
           <li
             key={task.id}
             style={{
