@@ -1,37 +1,54 @@
-import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setTasks,
+  setTaskInput,
+  setEditingTaskId,
+  setEditInput,
+} from "./redux/slices/taskSlice";
+import { setFilterPriority } from "./redux/slices/filterSlice";
+import { setStartTimeInput, setEndTimeInput } from "./redux/slices/timeSlice";
 import "./App.css";
+import { useEffect, useState } from "react";
 
 function App() {
-  const [tasks, setTasks] = useState(() => {
+  const [loading, setLoading] = useState(true);
+  const tasks = useSelector((state) => state.tasks.tasks);
+  const taskInput = useSelector((state) => state.tasks.taskInput);
+  const editingTaskId = useSelector((state) => state.tasks.editingTaskId);
+  const editInput = useSelector((state) => state.tasks.editInput);
+  const filterPriority = useSelector((state) => state.filter.filterPriority);
+  const startTimeInput = useSelector((state) => state.time.startTimeInput);
+  const endTimeInput = useSelector((state) => state.time.endTimeInput);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
     const storedTasks = localStorage.getItem("tasks");
-    return storedTasks ? JSON.parse(storedTasks) : [];
-  });
-  const [taskInput, setTaskInput] = useState("");
-  const [priority, setPriority] = useState("low");
-  const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editInput, setEditInput] = useState("");
-  const [filterPriority, setFilterPriority] = useState("all");
-  const [startTimeInput, setStartTimeInput] = useState("");
-  const [endTimeInput, setEndTimeInput] = useState("");
+    if (storedTasks) {
+      dispatch(setTasks(JSON.parse(storedTasks)));
+    }
+    setLoading(false);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!loading) {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+  }, [tasks, loading]);
 
   const handleChange = (e) => {
-    setTaskInput(e.target.value);
+    dispatch(setTaskInput(e.target.value));
   };
 
   const handlePriorityChange = (e) => {
-    setPriority(e.target.value);
-  };
-
-  const handleFilterPriorityChange = (e) => {
-    setFilterPriority(e.target.value);
+    dispatch(setFilterPriority(e.target.value));
   };
 
   const handleStartTimeChange = (e) => {
-    setStartTimeInput(e.target.value);
+    dispatch(setStartTimeInput(e.target.value));
   };
 
   const handleEndTimeChange = (e) => {
-    setEndTimeInput(e.target.value);
+    dispatch(setEndTimeInput(e.target.value));
   };
 
   const addTask = () => {
@@ -39,51 +56,51 @@ function App() {
       const newTask = {
         id: Date.now(),
         text: taskInput,
-        priority: priority,
+        priority: "low",
         completed: false,
         startTime: startTimeInput,
         endTime: endTimeInput,
       };
-      setTasks([...tasks, newTask]);
-      setTaskInput("");
-      setStartTimeInput("");
-      setEndTimeInput("");
+      dispatch(setTasks([...tasks, newTask]));
+      dispatch(setTaskInput(""));
+      dispatch(setStartTimeInput(""));
+      dispatch(setEndTimeInput(""));
     }
   };
 
   const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+    dispatch(setTasks(tasks.filter((task) => task.id !== id)));
   };
 
   const toggleTaskCompletion = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
+    dispatch(
+      setTasks(
+        tasks.map((task) =>
+          task.id === id ? { ...task, completed: !task.completed } : task
+        )
       )
     );
   };
 
   const handleEditInputChange = (e) => {
-    setEditInput(e.target.value);
+    dispatch(setEditInput(e.target.value));
   };
 
   const startEditingTask = (id, text) => {
-    setEditingTaskId(id);
-    setEditInput(text);
+    dispatch(setEditingTaskId(id));
+    dispatch(setEditInput(text));
   };
 
   const finishEditingTask = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, text: editInput } : task
+    dispatch(
+      setTasks(
+        tasks.map((task) =>
+          task.id === id ? { ...task, text: editInput } : task
+        )
       )
     );
-    setEditingTaskId(null);
+    dispatch(setEditingTaskId(null));
   };
-
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
 
   const getEndTimeInMilliSeconds = (endTime) => {
     const timeParts = endTime.split(":");
@@ -93,14 +110,6 @@ function App() {
     const timeInMilliseconds = dateObj.getTime();
     return timeInMilliseconds;
   };
-
-  const totalTasks = tasks.length;
-
-  const completedTasks = tasks.filter((task) => task.completed).length;
-
-  const filteredTasks = tasks.filter(
-    (task) => filterPriority === "all" || task.priority === filterPriority
-  );
 
   return (
     <div className="App">
@@ -112,7 +121,8 @@ function App() {
           onChange={handleChange}
           placeholder="Enter task"
         />
-        <select value={priority} onChange={handlePriorityChange}>
+        <select value={filterPriority} onChange={handlePriorityChange}>
+          <option value="all">All</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
@@ -129,26 +139,13 @@ function App() {
         />
         <button onClick={addTask}>Add Task</button>
       </div>
-      <div>
-        <label htmlFor="filterPriority">Filter by Priority:</label>
-        <select
-          id="filterPriority"
-          value={filterPriority}
-          onChange={handleFilterPriorityChange}
-        >
-          <option value="all">All</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-      </div>
-      <div>
-        <p>Total Tasks: {totalTasks}</p>
-        <p>Completed Tasks: {completedTasks}</p>
-      </div>
-      <div>
-        <ul>
-          {filteredTasks.map((task, i) => (
+      <ul>
+        {tasks
+          .filter(
+            (task) =>
+              filterPriority === "all" || task.priority === filterPriority
+          )
+          .map((task) => (
             <li key={task.id}>
               <div>
                 {editingTaskId === task.id ? (
@@ -164,18 +161,11 @@ function App() {
                     onClick={() => startEditingTask(task.id, task.text)}
                     style={{
                       textDecoration: task.completed ? "line-through" : "none",
-                      color:
-                        task.priority === "high"
-                          ? "red"
-                          : task.priority === "medium"
-                          ? "orange"
-                          : "green",
                     }}
                   >
-                    {i + 1}-{task.text}
+                    {task.text}
                   </span>
-                )}{" "}
-                - Status: {task.completed ? "Completed" : "Not Completed"}
+                )}
                 {task.endTime &&
                 Date.now() > getEndTimeInMilliSeconds(task.endTime) &&
                 !task.completed ? (
@@ -205,8 +195,7 @@ function App() {
               </div>
             </li>
           ))}
-        </ul>
-      </div>
+      </ul>
     </div>
   );
 }
