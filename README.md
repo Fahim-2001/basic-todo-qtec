@@ -11,9 +11,11 @@
 #### Features :
 1. Add Task.
 2. Edit Task (By clicking on the task).
-3. Delete Task
-4. Set Priority of the task while adding
-5. Mark task as completed or not.
+3. Set Priority of the task while adding
+4. Mark task as completed or not.
+5. Filter tasks based on priority
+6. Delete Task
+7. Responsive.
 
 ##### Additional Feature :
 1. Set Time Frame while adding task
@@ -21,4 +23,10 @@
 3. Realtime clock and date.
 
 #### Styling :
-1. Tailwindcss
+1. Tailwindcss.
+2. SVGRepo for icons.
+
+#### Deployment :
+Netlify
+
+### Have a visit to the simple app and Have a good day.
