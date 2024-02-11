@@ -1,4 +1,4 @@
-## Welcome Fahim's To Do
+## Welcome to Fahim's To Do
 
 #### Live Link: [Fahim's To Do](https://todobyfahim.netlify.app/)
 
