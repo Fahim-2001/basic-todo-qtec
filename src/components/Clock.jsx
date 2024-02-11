@@ -14,7 +14,7 @@ export const Clock = () => {
 
   const formattedTime = time.toLocaleTimeString();
   return (
-    <div>
+    <div className="flex justify-between mt-2 mb-4">
       <p>Date: {date.toLocaleDateString()}</p>
       <p>Time: {formattedTime}</p>
     </div>

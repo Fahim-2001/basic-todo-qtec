@@ -5,8 +5,8 @@ import { Tasks } from "./components/Tasks";
 function App() {
   
   return (
-    <div className="App">
-      <h1>Todo</h1>
+    <div className="pt-20 mx-5 lg:mx-10">
+      <h1 className="text-center text-6xl font-bold overflow-y-hidden py-3">Todo</h1>
       <Clock/>
       <Input/>
       <Tasks/>
